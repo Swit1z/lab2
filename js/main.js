@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadCards();
     renderAllColumns();
     setupEventListeners();
+    checkLock();
 });
 
 
@@ -25,6 +26,7 @@ function saveCards() {
     localStorage.setItem('cards', JSON.stringify(cards));
     localStorage.setItem('cardId', cardId.toString());
 }
+
 
 function setupEventListeners() {
     document.getElementById('createCardBtn').addEventListener('click', createCard);
@@ -57,7 +59,7 @@ function createCard() {
         return;
     }
     
-  
+    
     const items = Array.from(itemInputs)
         .map(input => input.value.trim())
         .filter(text => text !== '');
@@ -72,13 +74,13 @@ function createCard() {
         return;
     }
     
-   
+    
     if (cards[1].length >= 3) {
         alert('В первом столбце не может быть больше 3 карточек!');
         return;
     }
     
-  
+    
     const newCard = {
         id: cardId++,
         title: title,
@@ -89,8 +91,9 @@ function createCard() {
     cards[1].push(newCard);
     saveCards();
     renderAllColumns();
+    checkLock();
     
-
+   
     document.getElementById('cardTitle').value = '';
     const container = document.getElementById('itemsContainer');
     container.innerHTML = `
@@ -139,7 +142,7 @@ function createCardElement(card, column) {
     
     const deleteBtn = document.createElement('button');
     deleteBtn.className = 'delete-btn';
-    deleteBtn.textContent = '🗑️';
+    deleteBtn.textContent = '-';
     deleteBtn.onclick = () => deleteCard(card.id, column);
     
     header.appendChild(titleInput);
@@ -169,12 +172,23 @@ function createCardElement(card, column) {
     
     div.appendChild(list);
     
-
+   
     if (card.completedAt) {
         const info = document.createElement('div');
         info.className = 'completion-info';
         info.textContent = `Завершено: ${new Date(card.completedAt).toLocaleString('ru-RU')}`;
         div.appendChild(info);
+    }
+    
+    
+    const completed = card.items.filter(i => i.completed).length;
+    const total = card.items.length;
+    const percent = (completed / total) * 100;
+    
+    if (percent === 100) {
+        div.style.borderLeft = '4px solid #4CAF50';
+    } else if (percent > 50) {
+        div.style.borderLeft = '4px solid #FF9800';
     }
     
     return div;
@@ -187,12 +201,12 @@ function toggleItem(cardId, column, itemIndex) {
     
     card.items[itemIndex].completed = !card.items[itemIndex].completed;
     
- 
+   
     const completed = card.items.filter(i => i.completed).length;
     const total = card.items.length;
     const percent = (completed / total) * 100;
     
- 
+    
     if (column === 1 && percent > 50) {
         moveToColumn(cardId, 1, 2);
     } else if (percent === 100) {
@@ -202,6 +216,7 @@ function toggleItem(cardId, column, itemIndex) {
     
     saveCards();
     renderAllColumns();
+    checkLock();
 }
 
 
@@ -220,5 +235,22 @@ function deleteCard(cardId, column) {
         cards[column] = cards[column].filter(c => c.id !== cardId);
         saveCards();
         renderAllColumns();
+        checkLock();
+    }
+}
+
+
+function checkLock() {
+    const col1 = document.getElementById('column1');
+    const isCol2Full = cards[2].length >= 5;
+    const hasOver50 = cards[1].some(card => {
+        const completed = card.items.filter(i => i.completed).length;
+        return (completed / card.items.length) * 100 > 50;
+    });
+    
+    if (isCol2Full && hasOver50) {
+        col1.classList.add('locked');
+    } else {
+        col1.classList.remove('locked');
     }
 }

@@ -1,0 +1,153 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f0f2f5;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #333;
+}
+
+.columns {
+    display: flex;
+    gap: 20px;
+}
+
+.column {
+    flex: 1;
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.column h2 {
+    margin-bottom: 20px;
+    color: #333;
+    text-align: center;
+}
+
+
+.create-form {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+#create-form input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.form-controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.form-controls button {
+    flex: 1;
+    padding: 8px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background: #667eea;
+    color: white;
+}
+
+.form-controls button:hover {
+    background: #5568d3;
+}
+
+
+.card {
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border-left: 4px solid #667eea;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.card-title {
+    font-weight: bold;
+    font-size: 1.1em;
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 5px;
+}
+
+.card-title:focus {
+    background: #f0f0f0;
+    outline: none;
+}
+
+.delete-btn {
+    background: #ff4444;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.delete-btn:hover {
+    background: #cc0000;
+}
+
+.card-list {
+    list-style: none;
+}
+
+.card-list li {
+    padding: 8px;
+    margin-bottom: 5px;
+    background: #f8f9fa;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.card-list input[type="checkbox"] {
+    cursor: pointer;
+}
+
+.completed {
+    text-decoration: line-through;
+    color: #999;
+}
+
+.completion-info {
+    margin-top: 10px;
+    font-size: 0.9em;
+    color: #666;
+    text-align: right;
+}
+
+
