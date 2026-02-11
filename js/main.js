@@ -52,13 +52,13 @@ function createCard() {
     const title = document.getElementById('cardTitle').value.trim();
     const itemInputs = document.querySelectorAll('.item-input');
     
- 
+    
     if (!title) {
         alert('Введите заголовок!');
         return;
     }
     
-   
+  
     const items = Array.from(itemInputs)
         .map(input => input.value.trim())
         .filter(text => text !== '');
@@ -73,7 +73,7 @@ function createCard() {
         return;
     }
     
-  
+ 
     if (cards[1].length >= 3) {
         alert('В первом столбце не может быть больше 3 карточек!');
         return;
@@ -91,7 +91,7 @@ function createCard() {
     saveCards();
     renderAllColumns();
     
-  
+
     document.getElementById('cardTitle').value = '';
     const container = document.getElementById('itemsContainer');
     container.innerHTML = `
@@ -118,24 +118,75 @@ function renderColumn(column) {
     });
 }
 
-
 function createCardElement(card, column) {
     const div = document.createElement('div');
     div.className = 'card';
     div.dataset.id = card.id;
     div.dataset.column = column;
     
-    const title = document.createElement('h3');
-    title.textContent = card.title;
-    div.appendChild(title);
+ 
+    const header = document.createElement('div');
+    header.className = 'card-header';
     
+    const titleInput = document.createElement('input');
+    titleInput.type = 'text';
+    titleInput.className = 'card-title';
+    titleInput.value = card.title;
+    titleInput.onchange = (e) => {
+        card.title = e.target.value;
+        saveCards();
+    };
+    
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'delete-btn';
+    deleteBtn.textContent = '🗑️';
+    deleteBtn.onclick = () => deleteCard(card.id, column);
+    
+    header.appendChild(titleInput);
+    header.appendChild(deleteBtn);
+    div.appendChild(header);
+    
+
     const list = document.createElement('ul');
-    card.items.forEach(item => {
+    list.className = 'card-list';
+    
+    card.items.forEach((item, index) => {
         const li = document.createElement('li');
-        li.textContent = item.text;
+        
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = item.completed;
+        checkbox.onchange = () => toggleItem(card.id, column, index);
+        
+        const span = document.createElement('span');
+        span.textContent = item.text;
+        if (item.completed) span.className = 'completed';
+        
+        li.appendChild(checkbox);
+        li.appendChild(span);
         list.appendChild(li);
     });
+    
     div.appendChild(list);
     
     return div;
+}
+
+
+function toggleItem(cardId, column, itemIndex) {
+    const card = cards[column].find(c => c.id === cardId);
+    if (!card) return;
+    
+    card.items[itemIndex].completed = !card.items[itemIndex].completed;
+    saveCards();
+    renderAllColumns();
+}
+
+
+function deleteCard(cardId, column) {
+    if (confirm('Удалить карточку?')) {
+        cards[column] = cards[column].filter(c => c.id !== cardId);
+        saveCards();
+        renderAllColumns();
+    }
 }
