@@ -26,7 +26,6 @@ function saveCards() {
     localStorage.setItem('cardId', cardId.toString());
 }
 
-
 function setupEventListeners() {
     document.getElementById('createCardBtn').addEventListener('click', createCard);
     document.getElementById('addItemBtn').addEventListener('click', addItemInput);
@@ -52,7 +51,7 @@ function createCard() {
     const title = document.getElementById('cardTitle').value.trim();
     const itemInputs = document.querySelectorAll('.item-input');
     
-    
+   
     if (!title) {
         alert('Введите заголовок!');
         return;
@@ -73,13 +72,13 @@ function createCard() {
         return;
     }
     
- 
+   
     if (cards[1].length >= 3) {
         alert('В первом столбце не может быть больше 3 карточек!');
         return;
     }
     
-
+  
     const newCard = {
         id: cardId++,
         title: title,
@@ -118,13 +117,14 @@ function renderColumn(column) {
     });
 }
 
+
 function createCardElement(card, column) {
     const div = document.createElement('div');
     div.className = 'card';
     div.dataset.id = card.id;
     div.dataset.column = column;
     
- 
+  
     const header = document.createElement('div');
     header.className = 'card-header';
     
@@ -146,7 +146,7 @@ function createCardElement(card, column) {
     header.appendChild(deleteBtn);
     div.appendChild(header);
     
-
+   
     const list = document.createElement('ul');
     list.className = 'card-list';
     
@@ -169,6 +169,14 @@ function createCardElement(card, column) {
     
     div.appendChild(list);
     
+
+    if (card.completedAt) {
+        const info = document.createElement('div');
+        info.className = 'completion-info';
+        info.textContent = `Завершено: ${new Date(card.completedAt).toLocaleString('ru-RU')}`;
+        div.appendChild(info);
+    }
+    
     return div;
 }
 
@@ -178,8 +186,32 @@ function toggleItem(cardId, column, itemIndex) {
     if (!card) return;
     
     card.items[itemIndex].completed = !card.items[itemIndex].completed;
+    
+ 
+    const completed = card.items.filter(i => i.completed).length;
+    const total = card.items.length;
+    const percent = (completed / total) * 100;
+    
+ 
+    if (column === 1 && percent > 50) {
+        moveToColumn(cardId, 1, 2);
+    } else if (percent === 100) {
+        card.completedAt = new Date().toISOString();
+        moveToColumn(cardId, column, 3);
+    }
+    
     saveCards();
     renderAllColumns();
+}
+
+
+function moveToColumn(cardId, from, to) {
+    const index = cards[from].findIndex(c => c.id === cardId);
+    if (index === -1) return;
+    
+    const card = cards[from][index];
+    cards[from].splice(index, 1);
+    cards[to].push(card);
 }
 
 
