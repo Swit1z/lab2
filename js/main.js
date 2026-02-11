@@ -10,7 +10,6 @@ document.addEventListener('DOMContentLoaded', () => {
     loadCards();
     renderAllColumns();
     setupEventListeners();
-    checkLock();
 });
 
 
@@ -53,7 +52,7 @@ function createCard() {
     const title = document.getElementById('cardTitle').value.trim();
     const itemInputs = document.querySelectorAll('.item-input');
     
-   
+    
     if (!title) {
         alert('Введите заголовок!');
         return;
@@ -80,7 +79,7 @@ function createCard() {
         return;
     }
     
-    
+   
     const newCard = {
         id: cardId++,
         title: title,
@@ -91,9 +90,8 @@ function createCard() {
     cards[1].push(newCard);
     saveCards();
     renderAllColumns();
-    checkLock();
     
-   
+  
     document.getElementById('cardTitle').value = '';
     const container = document.getElementById('itemsContainer');
     container.innerHTML = `
@@ -127,7 +125,7 @@ function createCardElement(card, column) {
     div.dataset.id = card.id;
     div.dataset.column = column;
     
-  
+    
     const header = document.createElement('div');
     header.className = 'card-header';
     
@@ -149,7 +147,6 @@ function createCardElement(card, column) {
     header.appendChild(deleteBtn);
     div.appendChild(header);
     
-   
     const list = document.createElement('ul');
     list.className = 'card-list';
     
@@ -180,15 +177,17 @@ function createCardElement(card, column) {
         div.appendChild(info);
     }
     
-    
+
     const completed = card.items.filter(i => i.completed).length;
     const total = card.items.length;
     const percent = (completed / total) * 100;
     
     if (percent === 100) {
         div.style.borderLeft = '4px solid #4CAF50';
+        div.style.backgroundColor = 'rgba(76, 175, 80, 0.08)';
     } else if (percent > 50) {
         div.style.borderLeft = '4px solid #FF9800';
+        div.style.backgroundColor = 'rgba(255, 152, 0, 0.08)';
     }
     
     return div;
@@ -201,14 +200,18 @@ function toggleItem(cardId, column, itemIndex) {
     
     card.items[itemIndex].completed = !card.items[itemIndex].completed;
     
-   
+    
     const completed = card.items.filter(i => i.completed).length;
     const total = card.items.length;
     const percent = (completed / total) * 100;
-    
-    
+   
     if (column === 1 && percent > 50) {
-        moveToColumn(cardId, 1, 2);
+        
+        if (cards[2].length >= 5) {
+            alert('Второй столбец заполнен! Дождитесь освобождения места.');
+        } else {
+            moveToColumn(cardId, 1, 2);
+        }
     } else if (percent === 100) {
         card.completedAt = new Date().toISOString();
         moveToColumn(cardId, column, 3);
@@ -216,7 +219,6 @@ function toggleItem(cardId, column, itemIndex) {
     
     saveCards();
     renderAllColumns();
-    checkLock();
 }
 
 
@@ -235,22 +237,5 @@ function deleteCard(cardId, column) {
         cards[column] = cards[column].filter(c => c.id !== cardId);
         saveCards();
         renderAllColumns();
-        checkLock();
-    }
-}
-
-
-function checkLock() {
-    const col1 = document.getElementById('column1');
-    const isCol2Full = cards[2].length >= 5;
-    const hasOver50 = cards[1].some(card => {
-        const completed = card.items.filter(i => i.completed).length;
-        return (completed / card.items.length) * 100 > 50;
-    });
-    
-    if (isCol2Full && hasOver50) {
-        col1.classList.add('locked');
-    } else {
-        col1.classList.remove('locked');
     }
 }
