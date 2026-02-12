@@ -40,7 +40,6 @@ h1 {
     text-align: center;
 }
 
-
 .create-form {
     background: #f8f9fa;
     padding: 15px;
@@ -48,7 +47,7 @@ h1 {
     margin-bottom: 20px;
 }
 
-#create-form input {
+.create-form input {
     width: 100%;
     padding: 10px;
     margin-bottom: 10px;
@@ -75,7 +74,6 @@ h1 {
 .form-controls button:hover {
     background: #5568d3;
 }
-
 
 .card {
     background: white;
@@ -150,4 +148,26 @@ h1 {
     text-align: right;
 }
 
+.item-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+}
 
+.item-row input {
+    flex: 1;
+}
+
+.remove-btn {
+    background: #ff4444;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.remove-btn:hover {
+    background: #cc0000;
+}

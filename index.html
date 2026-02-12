@@ -3,42 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Приложение для заметок</title>
+    <title>Приложение для заметок - Vue 3</title>
+    <script src="js/vue.js"></script>
     <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-    <div class="container">
-        <h1> Приложение для заметок</h1>
-        
-        <div class="columns">
-            <div class="column" id="column1">
-                <h2>Новые задачи (мин 3)</h2>
-                
-                
-                <div class="create-form">
-                    <input type="text" id="cardTitle" placeholder="Заголовок карточки">
-                    <div id="itemsContainer">
-                        <input type="text" class="item-input" placeholder="Пункт 1">
-                        <input type="text" class="item-input" placeholder="Пункт 2">
-                        <input type="text" class="item-input" placeholder="Пункт 3">
+    <div id="app">
+        <div class="container">
+            <h1> Приложение для заметок</h1>
+            
+            <div class="columns">
+                <div class="column">
+                    <h2>Новые задачи (мин 3)</h2>
+                    
+                    <div class="create-form">
+                        <input 
+                            v-model="newCardTitle" 
+                            type="text" 
+                            placeholder="Заголовок карточки"
+                            @keyup.enter="addItemInput"
+                        >
+                        <div id="itemsContainer">
+                            <div v-for="(item, index) in newCardItems" :key="index" class="item-row">
+                                <input 
+                                    v-model="newCardItems[index]" 
+                                    type="text" 
+                                    :placeholder="`Пункт ${index + 1}`"
+                                    @keyup.enter="index === newCardItems.length - 1 && newCardItems.length < 5 ? addItemInput() : null"
+                                >
+                                <button 
+                                    v-if="newCardItems.length > 3" 
+                                    @click="removeItemInput(index)"
+                                    class="remove-btn">-</button>
+                            </div>
+                        </div>
+                        <div class="form-controls">
+                            <button 
+                                v-if="newCardItems.length < 5" 
+                                @click="addItemInput"
+                                :disabled="newCardItems.length >= 5"
+                            >
+                                + Добавить пункт
+                            </button>
+                            <button 
+                                @click="createCard"
+                                :disabled="!canCreateCard"
+                            >
+                                Создать карточку
+                            </button>
+                        </div>
                     </div>
-                    <div class="form-controls">
-                        <button id="addItemBtn">+ Добавить пункт</button>
-                        <button id="createCardBtn">Создать карточку</button>
+                    
+                    <div class="cards">
+                        <Card 
+                            v-for="card in column1Cards" 
+                            :key="card.id" 
+                            :card="card" 
+                            :column="1"
+                            @toggle-item="handleToggleItem"
+                            @delete-card="handleDeleteCard"
+                            @update-title="handleUpdateTitle"
+                        />
                     </div>
                 </div>
                 
-                <div class="cards" id="cards1"></div>
-            </div>
-            
-            <div class="column" id="column2">
-                <h2>В работе (макс 5)</h2>
-                <div class="cards" id="cards2"></div>
-            </div>
-            
-            <div class="column" id="column3">
-                <h2>Завершено</h2>
-                <div class="cards" id="cards3"></div>
+                <div class="column">
+                    <h2>В работе (макс 5)</h2>
+                    <div class="cards">
+                        <Card 
+                            v-for="card in column2Cards" 
+                            :key="card.id" 
+                            :card="card" 
+                            :column="2"
+                            @toggle-item="handleToggleItem"
+                            @delete-card="handleDeleteCard"
+                            @update-title="handleUpdateTitle"
+                        />
+                    </div>
+                </div>
+                
+                <div class="column">
+                    <h2>Завершено</h2>
+                    <div class="cards">
+                        <Card 
+                            v-for="card in column3Cards" 
+                            :key="card.id" 
+                            :card="card" 
+                            :column="3"
+                            @toggle-item="handleToggleItem"
+                            @delete-card="handleDeleteCard"
+                            @update-title="handleUpdateTitle"
+                        />
+                    </div>
+                </div>
             </div>
         </div>
     </div>
