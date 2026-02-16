@@ -1,5 +1,4 @@
-const { createApp, ref, computed, onMounted, watch } = Vue;
-
+const { createApp } = Vue;
 
 const Card = {
     props: ['card', 'column', 'blocked'],
@@ -20,10 +19,10 @@ const Card = {
             >-</button>
             <ul class="card-list">
                 <li v-for="(item, index) in card.items" :key="index">
-                    <input 
+                      <input 
                         type="checkbox" 
                         :checked="item.completed"
-                        @change="onToggle(index)"
+                        @click.prevent="onToggle(index)"
                         :disabled="blocked"
                     >
                     <span :class="{ completed: item.completed }">{{ item.text }}</span>
@@ -39,6 +38,9 @@ const Card = {
             return new Date(dateString).toLocaleString('ru-RU');
         },
         onToggle(index) {
+            if (this.card.items[index].completed) {
+            return;
+        }
             if (!this.blocked) {
                 this.$emit('toggleItem', this.card.id, this.column, index);
             }
@@ -53,7 +55,7 @@ const Card = {
         cardStyle() {
             const completed = this.card.items.filter(i => i.completed).length;
             const total = this.card.items.length;
-            const percent = (completed / total) * 100;
+            const percent = total > 0 ? (completed / total) * 100 : 0;
             
             if (percent === 100) {
                 return { 
@@ -105,8 +107,9 @@ const Column = {
 
 
 const CardCreator = {
+    name: 'CardCreator',
     props: ['canCreate'],
-    emits: ['createCard', 'addItemInput', 'removeItemInput'],
+    emits: ['createCard'],
     template: `
         <div class="create-section">
             <h2>Новые задачи (мин 3)</h2>
@@ -147,72 +150,63 @@ const CardCreator = {
             </button>
         </div>
     `,
-    setup(props, { emit }) {
-        const localTitle = ref('');
-        const localItems = ref(['', '', '']);
-        
-        const canCreate = computed(() => {
-            return (
-                localTitle.value.trim() !== '' &&
-                localItems.value.filter(item => item.trim() !== '').length >= 3 &&
-                localItems.value.filter(item => item.trim() !== '').length <= 5
-            );
-        });
-        
-        function onAddItem() {
-            if (localItems.value.length >= 5) {
-                alert('Максимум 5 пунктов!');
-                return;
-            }
-            localItems.value.push('');
+    data() {
+        return {
+            localTitle: '',
+            localItems: ['', '', '']
         }
-        
-        function onRemoveItem(index) {
-            if (localItems.value.length > 3) {
-                localItems.value.splice(index, 1);
+    },
+    computed: {
+        canCreateComputed() {
+            const validTitle = this.localTitle.trim() !== ''
+            const filledItems = this.localItems.filter(item => item.trim() !== '').length
+            return validTitle && filledItems >= 3 && filledItems <= 5
+        }
+    },
+    methods: {
+        onAddItem() {
+            if (this.localItems.length >= 5) {
+                alert('Максимум 5 пунктов!')
+                return
+            }
+            this.localItems.push('')
+        },
+        onRemoveItem(index) {
+            if (this.localItems.length > 3) {
+                this.localItems.splice(index, 1)
             } else {
-                alert('Минимальное количество пунктов - 3!');
+                alert('Минимальное количество пунктов - 3!')
             }
-        }
-        
-        function onCreateCard() {
-            if (!canCreate.value) {
-                if (localTitle.value.trim() === '') {
-                    alert('Введите заголовок!');
-                } else if (localItems.value.filter(item => item.trim() !== '').length < 3) {
-                    alert('Нужно минимум 3 пункта!');
+        },
+        onCreateCard() {
+            if (!this.canCreateComputed) {
+                if (this.localTitle.trim() === '') {
+                    alert('Введите заголовок!')
+                } else if (this.localItems.filter(item => item.trim() !== '').length < 3) {
+                    alert('Нужно минимум 3 пункта!')
                 }
-                return;
+                return
             }
             
-            const items = localItems.value
+            const items = this.localItems
                 .map(text => text.trim())
                 .filter(text => text !== '')
-                .map(text => ({ text, completed: false }));
+                .map(text => ({ text, completed: false }))
             
             const cardData = {
-                title: localTitle.value.trim(),
+                title: this.localTitle.trim(),
                 items: items
-            };
+            }
             
-            emit('createCard', cardData);
+            this.$emit('createCard', cardData)
             
-            localTitle.value = '';
-            localItems.value = ['', '', ''];
+            this.localTitle = ''
+            this.localItems = ['', '', '']
         }
-        
-        return {
-            localTitle,
-            localItems,
-            canCreate,
-            onAddItem,
-            onRemoveItem,
-            onCreateCard
-        };
     }
 };
 
-
+//fdfdfdfdfdf
 const App = {
     components: { Column, CardCreator },
     template: `
@@ -257,140 +251,141 @@ const App = {
             </div>
         </div>
     `,
-    setup() {
-        const cards = ref({
-            1: [],
-            2: [],
-            3: []
-        });
-        const cardIdCounter = ref(1);
-        
-        const column1Cards = computed(() => cards.value[1]);
-        const column2Cards = computed(() => cards.value[2]);
-        const column3Cards = computed(() => cards.value[3]);
-        
-        const isColumn2Full = computed(() => cards.value[2].length >= 5);
-        
-        const canCreateCard = computed(() => {
-            return cards.value[1].length < 3;
-        });
-        
-        onMounted(() => {
-            loadCards();
-        });
-        
-        watch(cards, () => {
-            saveCards();
-        }, { deep: true });
-        
-        watch(cardIdCounter, () => {
-            saveCards();
-        });
-        
-        function loadCards() {
-            const savedCards = localStorage.getItem('notesCards');
-            const savedIdCounter = localStorage.getItem('notesCardIdCounter');
-            
+
+    //fdfdfdffdd
+
+    data() {
+        return {
+            cards: {
+                1: [],
+                2: [],
+                3: []
+            },
+            cardIdCounter: 1
+        }
+    },
+    computed: {
+        column1Cards() {
+            return this.cards[1]
+        },
+        column2Cards() {
+            return this.cards[2]
+        },
+        column3Cards() {
+            return this.cards[3]
+        },
+        isColumn2Full() {
+            return this.cards[2].length >= 5
+        },
+        canCreateCard() {
+            return this.cards[1].length < 3
+        }
+    },
+    watch: {
+        cards: {
+            handler() {
+                this.saveCards()
+            },
+            deep: true
+        },
+        cardIdCounter() {
+            this.saveCards()
+        }
+    },
+    mounted() {
+        this.loadCards()
+    },
+    methods: {
+        loadCards() {
+            const savedCards = localStorage.getItem('notesCards')
+            const savedIdCounter = localStorage.getItem('notesCardIdCounter')
+
             if (savedCards) {
-                cards.value = JSON.parse(savedCards);
+                this.cards = JSON.parse(savedCards)
             }
-            
+
             if (savedIdCounter) {
-                cardIdCounter.value = parseInt(savedIdCounter);
+                this.cardIdCounter = parseInt(savedIdCounter)
             }
-        }
-        
-        function saveCards() {
-            localStorage.setItem('notesCards', JSON.stringify(cards.value));
-            localStorage.setItem('notesCardIdCounter', cardIdCounter.value.toString());
-        }
-        
-        function handleCreateCard(cardData) {
-            if (cards.value[1].length >= 3) {
-                alert('В первом столбце не может быть больше 3 карточек!');
-                return;
+        },
+        saveCards() {
+            localStorage.setItem('notesCards', JSON.stringify(this.cards))
+            localStorage.setItem('notesCardIdCounter', this.cardIdCounter.toString())
+        },
+        handleCreateCard(cardData) {
+            if (this.cards[1].length >= 3) {
+                alert('В первом столбце не может быть больше 3 карточек!')
+                return
             }
-            
+
             const newCard = {
-                id: cardIdCounter.value++,
+                id: this.cardIdCounter++,
                 title: cardData.title,
                 items: cardData.items,
                 completedAt: null
-            };
-            
-            cards.value[1].push(newCard);
-        }
-        
-        function handleToggleItem(cardId, column, itemIndex) {
-            if (isColumn2Full.value && column === 1) {
-                alert('Второй столбец заполнен! Освободите место для продолжения работы.');
-                return;
             }
-            
-            const card = cards.value[column].find(c => c.id === cardId);
-            if (!card) return;
-            
-            card.items[itemIndex].completed = !card.items[itemIndex].completed;
-            
-            const completed = card.items.filter(i => i.completed).length;
-            const total = card.items.length;
-            const percent = (completed / total) * 100;
-            
-            if (column === 1 && percent >= 50) {
-                if (cards.value[2].length >= 5) {
-                    alert('Второй столбец заполнен! Дождитесь освобождения места.');
+
+            this.cards[1].push(newCard)
+        },
+        handleToggleItem(cardId, column, itemIndex) {
+            if (this.isColumn2Full && column === 1) {
+                alert('Второй столбец заполнен! Освободите место для продолжения работы.')
+                return
+            }
+
+            const card = this.cards[column].find(c => c.id === cardId)
+            if (!card) return
+
+            card.items[itemIndex].completed = !card.items[itemIndex].completed
+
+            const completed = card.items.filter(i => i.completed).length
+            const total = card.items.length
+            if (total === 0) return
+
+            const percent = (completed / total) * 100
+
+if (column === 1 && percent >= 50) {
+                if (this.cards[2].length >= 5) {
+                    alert('Второй столбец заполнен! Дождитесь освобождения места.')
                 } else {
-                    moveToColumn(cardId, 1, 2);
+                    this.moveToColumn(cardId, 1, 2)
                 }
             } else if (percent === 100) {
-                card.completedAt = new Date().toISOString();
-                moveToColumn(cardId, column, 3);
+                card.completedAt = new Date().toISOString()
+                this.moveToColumn(cardId, column, 3)
             }
-        }
-        
-        function handleDeleteCard(cardId, column) {
-            if (isColumn2Full.value && column === 1) {
-                alert('Второй столбец заполнен! Освободите место для продолжения работы.');
-                return;
+        },
+        handleDeleteCard(cardId, column) {
+            if (this.isColumn2Full && column === 1) {
+                alert('Второй столбец заполнен! Освободите место для продолжения работы.')
+                return
             }
-            
+
             if (confirm('Удалить карточку?')) {
-                cards.value[column] = cards.value[column].filter(c => c.id !== cardId);
+                this.cards[column] = this.cards[column].filter(c => c.id !== cardId)
             }
-        }
-        
-        function handleUpdateTitle(cardId, column, newTitle) {
-            if (isColumn2Full.value && column === 1) return;
-            
-            const card = cards.value[column].find(c => c.id === cardId);
+        },
+        handleUpdateTitle(cardId, column, newTitle) {
+            if (this.isColumn2Full && column === 1) return
+
+            const card = this.cards[column].find(c => c.id === cardId)
             if (card) {
-                card.title = newTitle;
+                card.title = newTitle
             }
+        },
+        moveToColumn(cardId, from, to) {
+            const index = this.cards[from].findIndex(c => c.id === cardId)
+            if (index === -1) return
+
+            const card = this.cards[from][index]
+            this.cards[from].splice(index, 1)
+            this.cards[to].push({ ...card })
         }
-        
-        function moveToColumn(cardId, from, to) {
-            const index = cards.value[from].findIndex(c => c.id === cardId);
-            if (index === -1) return;
-            
-            const card = cards.value[from][index];
-            cards.value[from].splice(index, 1);
-            cards.value[to].push({ ...card });
-        }
-        
-        return {
-            cards,
-            cardIdCounter,
-            column1Cards,
-            column2Cards,
-            column3Cards,
-            canCreateCard,
-            isColumn2Full,
-            handleCreateCard,
-            handleToggleItem,
-            handleDeleteCard,
-            handleUpdateTitle
-        };
     }
-};
+}
 
 createApp(App).mount('#app');
+
+
+//fdfdf
+//fdfdfdf
